@@ -28,16 +28,14 @@ app.message("", async ({ message, say }) => {
     conversationHistory = result.messages;
 
     let chatHistory = "";
-    for (let i = conversationHistory.length - 1; i >= 0; i--) {
+    for (let i = 20 - 1; i >= 0; i--) {
       chatHistory += "\n"+conversationHistory[i].text;
     }
 
     // Print results
-     console.log(
-      conversationHistory.length + " messages found in " + message.user
-    );
+     console.log(chatHistory);
 
-    console.log(chatHistory);
+    //console.log(chatHistory);
     const configuration = new Configuration({
       apiKey: process.env.OPENAI_API_KEY,
     });
@@ -49,6 +47,8 @@ app.message("", async ({ message, say }) => {
       temperature: 0.9,
     });
     const textResponse = response.data.choices[0].text;
+    const tokens = response.data.usage.prompt_tokens;
+    await console.log(tokens)
     await say(textResponse);
   } catch (error) {
     console.error(error);
