@@ -16,27 +16,40 @@ const app = new App({
   console.log("⚡️ Bolt app is running!");
 })();
 
-var conversation = [];
-
 app.message("", async ({ message, say }) => {
   try {
-    conversation[message.user] += "\n" + message.text;
-    console.log(message.user);
-    //  await ack();
+    let conversationHistory = [];
+    // Call the conversations.history method using WebClient
+    const result = await app.client.conversations.history({
+      token: process.env.SLACK_BOT_TOKEN,
+      channel: message.channel,
+    });
+
+    conversationHistory = result.messages;
+
+    let chatHistory = "";
+    for (let i = conversationHistory.length - 1; i >= 0; i--) {
+      chatHistory += "\n"+conversationHistory[i].text;
+    }
+
+    // Print results
+     console.log(
+      conversationHistory.length + " messages found in " + message.user
+    );
+
+    console.log(chatHistory);
     const configuration = new Configuration({
       apiKey: process.env.OPENAI_API_KEY,
     });
     const openai = new OpenAIApi(configuration);
     const response = await openai.createCompletion({
       model: "text-davinci-003",
-      prompt: conversation[message.user],
+      prompt: chatHistory,
       max_tokens: 1000,
       temperature: 0.9,
     });
     const textResponse = response.data.choices[0].text;
     await say(textResponse);
-    conversation[message.user] += "\n" + textResponse;
-    console.log(conversation[message.user]);
   } catch (error) {
     console.error(error);
     await say("System is currently down");
@@ -48,9 +61,8 @@ app.command("/chat_gpt_ask", async ({ command, ack, respond }) => {
   await respond("currently not working");
 });
 
-app.command("/chat_gpt_reset_context", async ({ command, ack, respond }) => {  
+app.command("/chat_gpt_reset_context", async ({ command, ack, respond }) => {
   //console.log(command.user_id)
-  conversation[command.user_id] = null;
-  await ack()
-  await respond("----History Purged----")
+  await ack();
+  await respond("----History Purged----");
 });
