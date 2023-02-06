@@ -16,5 +16,5 @@ SLACK_SIGNING_SECRET =   <<SIGNING_SECRET_FROM_SLACK>>
 OPENAI_API_KEY = <<API_KEY_FROM_OPEN_API>>  
 ```
 
-For testing puprposes you can test the slack app for free on:  
+For testing puprposes you can run the Slack app for free on:  
 https://glitch.com
