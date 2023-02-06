@@ -18,8 +18,19 @@ const app = new App({
 
 app.message("", async ({ message, say }) => {
   try {
+    if (message.thread_ts) {
+      console.log("threaded message");
+      return;
+    }
+
+    var outputMessage = await app.client.chat.postMessage({
+      token: process.env.SLACK_BOT_TOKEN,
+      text: ":hourglass_flowing_sand: ",
+      channel: message.channel,
+    });
+
     var conversationHistory = [];
-    var chatHistory = ""
+    var chatHistory = "";
     // Call the conversations.history method using WebClient
     const result = await app.client.conversations.history({
       token: process.env.SLACK_BOT_TOKEN,
@@ -28,16 +39,15 @@ app.message("", async ({ message, say }) => {
 
     conversationHistory = result.messages;
     var history = 30;
-    
-    if (conversationHistory.lenght < 30)
-      history = conversationHistory.lenght - 1
-    
-    for (let i = history - 1; i >= 0; i--) {
-      chatHistory += "\n"+conversationHistory[i].text;
+
+    if (conversationHistory.lenght < 30) history = conversationHistory.lenght;
+
+    for (let i = history; i >= 0; i--) {
+      chatHistory += "\n" + conversationHistory[i].text;
     }
 
     // Print results
-     console.log(chatHistory);
+    //console.log(chatHistory);
 
     var configuration = new Configuration({
       apiKey: process.env.OPENAI_API_KEY,
@@ -51,13 +61,19 @@ app.message("", async ({ message, say }) => {
     });
     var textResponse = response.data.choices[0].text;
     var tokens = response.data.usage.prompt_tokens;
-    await console.log("Tokens used: "+tokens)
-    await say(textResponse);
+    // await console.log("Tokens used: " + tokens);
+    await app.client.chat.update({
+      token: process.env.SLACK_BOT_TOKEN,
+      channel: message.channel,
+      ts: outputMessage.ts,
+      text: textResponse,
+    });
   } catch (error) {
     console.error(error);
     await say("System is currently down");
   }
 });
+
 /*
 app.command("/chat_gpt_ask", async ({ command, ack, respond }) => {
   await ack();
