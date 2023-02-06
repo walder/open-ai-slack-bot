@@ -27,7 +27,12 @@ app.message("", async ({ message, say }) => {
     });
 
     conversationHistory = result.messages;
-    for (let i = 30 - 1; i >= 0; i--) {
+    var history = 30;
+    
+    if (conversationHistory.lenght < 30)
+      history = conversationHistory.lenght - 1
+    
+    for (let i = history - 1; i >= 0; i--) {
       chatHistory += "\n"+conversationHistory[i].text;
     }
 
