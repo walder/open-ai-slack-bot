@@ -30,7 +30,7 @@ app.message("", async ({ message, say }) => {
     });
 
     var conversationHistory = [];
-    var chatHistory = "";
+    var openAIPrompt = "";
     // Call the conversations.history method using WebClient
     const result = await app.client.conversations.history({
       token: process.env.SLACK_BOT_TOKEN,
@@ -43,11 +43,11 @@ app.message("", async ({ message, say }) => {
     if (conversationHistory.lenght < 30) history = conversationHistory.lenght;
 
     for (let i = history; i >= 0; i--) {
-      chatHistory += "\n" + conversationHistory[i].text;
+      openAIPrompt += "\n" + conversationHistory[i].text;
     }
 
     // Print results
-    //console.log(chatHistory);
+    //console.log(openAIPrompt);
 
     var configuration = new Configuration({
       apiKey: process.env.OPENAI_API_KEY,
@@ -55,7 +55,7 @@ app.message("", async ({ message, say }) => {
     const openai = new OpenAIApi(configuration);
     const response = await openai.createCompletion({
       model: "text-davinci-003",
-      prompt: chatHistory,
+      prompt: openAIPrompt,
       max_tokens: 1000,
       temperature: 0.9,
     });
