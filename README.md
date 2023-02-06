@@ -1,6 +1,6 @@
 # A Slack bot that sends chat messages to Open AI
 
-Users in a Slack workspace can chat directly to the bot by sending him a private message. The the chat bot will take in to account the last 20 messages in a conversation when giving an answer.
+Users in a Slack workspace can chat directly to the bot by sending him a private message. The the chat bot will take in to account the last 30 messages in a conversation when giving an answer.
  
 You will need an API key from Open AI:  
 https://openai.com/api/
