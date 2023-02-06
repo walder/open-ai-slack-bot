@@ -5,7 +5,7 @@ Users in a Slack workspace can chat directly to the bot by sending him a private
 You will need an API key from Open AI:  
 https://openai.com/api/
 
-Then set up an app in your slack Workspace:  
+Then set up an app in your Slack workspace:  
 https://api.slack.com/apps  
 
 Set the following ENV variables:  
