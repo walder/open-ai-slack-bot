@@ -18,7 +18,8 @@ const app = new App({
 
 app.message("", async ({ message, say }) => {
   try {
-    let conversationHistory = [];
+    var conversationHistory = [];
+    var chatHistory = ""
     // Call the conversations.history method using WebClient
     const result = await app.client.conversations.history({
       token: process.env.SLACK_BOT_TOKEN,
@@ -26,17 +27,14 @@ app.message("", async ({ message, say }) => {
     });
 
     conversationHistory = result.messages;
-
-    let chatHistory = "";
-    for (let i = 20 - 1; i >= 0; i--) {
+    for (let i = 30 - 1; i >= 0; i--) {
       chatHistory += "\n"+conversationHistory[i].text;
     }
 
     // Print results
      console.log(chatHistory);
 
-    //console.log(chatHistory);
-    const configuration = new Configuration({
+    var configuration = new Configuration({
       apiKey: process.env.OPENAI_API_KEY,
     });
     const openai = new OpenAIApi(configuration);
@@ -46,16 +44,16 @@ app.message("", async ({ message, say }) => {
       max_tokens: 1000,
       temperature: 0.9,
     });
-    const textResponse = response.data.choices[0].text;
-    const tokens = response.data.usage.prompt_tokens;
-    await console.log(tokens)
+    var textResponse = response.data.choices[0].text;
+    var tokens = response.data.usage.prompt_tokens;
+    await console.log("Tokens used: "+tokens)
     await say(textResponse);
   } catch (error) {
     console.error(error);
     await say("System is currently down");
   }
 });
-
+/*
 app.command("/chat_gpt_ask", async ({ command, ack, respond }) => {
   await ack();
   await respond("currently not working");
@@ -66,3 +64,4 @@ app.command("/chat_gpt_reset_context", async ({ command, ack, respond }) => {
   await ack();
   await respond("----History Purged----");
 });
+*/
