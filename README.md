@@ -8,7 +8,7 @@ https://openai.com/api/
 Then set up an app in your slack Workspace:  
 https://api.slack.com/apps  
 
-Set the following ENV Variables:  
+Set the following ENV variables:  
 
 ```
 SLACK_BOT_TOKEN = <<TOKEN_FROM_SLACK>>
