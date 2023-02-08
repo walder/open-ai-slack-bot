@@ -2,6 +2,7 @@
 const { App } = require("@slack/bolt");
 const fetch = require("node-fetch");
 const { Configuration, OpenAIApi } = require("openai");
+const OpenAIConversationHandler = require("./OpenAIConversationHandler");
 
 const app = new App({
   token: process.env.SLACK_BOT_TOKEN,
@@ -23,14 +24,9 @@ app.message("", async ({ message, say }) => {
       return;
     }
 
-    var outputMessage = await app.client.chat.postMessage({
-      token: process.env.SLACK_BOT_TOKEN,
-      text: ":hourglass_flowing_sand: ",
-      channel: message.channel,
-    });
+    // console.log("user ID: "+message.user)
 
     var conversationHistory = [];
-    var openAIPrompt = "";
     // Call the conversations.history method using WebClient
     const result = await app.client.conversations.history({
       token: process.env.SLACK_BOT_TOKEN,
@@ -38,39 +34,55 @@ app.message("", async ({ message, say }) => {
     });
 
     conversationHistory = result.messages;
-    var history = 30;
+    let conversation = new OpenAIConversationHandler(result.messages, 30);
+    let openAIPrompt = conversation.getConversation();
 
-    if (conversationHistory.lenght < 30) history = conversationHistory.lenght;
-
-    for (let i = history; i >= 0; i--) {
-      openAIPrompt += "\n" + conversationHistory[i].text;
-    }
+    const outputMessage = await app.client.chat.postMessage({
+      token: process.env.SLACK_BOT_TOKEN,
+      text: ":hourglass_flowing_sand: ",
+      channel: message.channel,
+    });
 
     // Print results
-    //console.log(openAIPrompt);
+    console.log(openAIPrompt);
 
-    var configuration = new Configuration({
+    const configuration = new Configuration({
       apiKey: process.env.OPENAI_API_KEY,
     });
     const openai = new OpenAIApi(configuration);
-    const response = await openai.createCompletion({
-      model: "text-davinci-003",
-      prompt: openAIPrompt,
-      max_tokens: 1000,
-      temperature: 0.9,
-    });
-    var textResponse = response.data.choices[0].text;
-    var tokens = response.data.usage.prompt_tokens;
+
+    try {
+      const response = await openai.createCompletion({
+        model: "text-davinci-003",
+        prompt: openAIPrompt,
+        max_tokens: 1000,
+        temperature: 0.9,
+      });
+      var textResponse = response.data.choices[0].text;
+      var tokens = response.data.usage.prompt_tokens;
+      const updateChatWitOpenAIResult = await app.client.chat.update({
+        token: process.env.SLACK_BOT_TOKEN,
+        channel: message.channel,
+        ts: outputMessage.ts,
+        text: textResponse,
+      });
+    } catch (error) {
+      console.error(error);
+      const chatDelete = await app.client.chat.delete({
+        token: process.env.SLACK_BOT_TOKEN,
+        channel: message.channel,
+        ts: outputMessage.ts,
+      });
+      const ephemeralFailureMessage = await app.client.chat.postEphemeral({
+        token: process.env.SLACK_BOT_TOKEN,
+        text: ":skull: Sorry, Open AI, is down :skull:",
+        channel: message.channel,
+        user: message.user,
+      });
+    }
     // await console.log("Tokens used: " + tokens);
-    await app.client.chat.update({
-      token: process.env.SLACK_BOT_TOKEN,
-      channel: message.channel,
-      ts: outputMessage.ts,
-      text: textResponse,
-    });
   } catch (error) {
     console.error(error);
-    await say("System is currently down");
   }
 });
 
