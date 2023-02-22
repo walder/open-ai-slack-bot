@@ -39,7 +39,7 @@ app.message("", async ({ message, say }) => {
 
     const outputMessage = await app.client.chat.postMessage({
       token: process.env.SLACK_BOT_TOKEN,
-      text: ":hourglass_flowing_sand: ",
+      text: ":hourglass_flowing_sand:",
       channel: message.channel,
     });
 

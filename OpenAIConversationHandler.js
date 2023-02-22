@@ -6,11 +6,11 @@ class OpenAIConversationHandler {
   }
   getConversation() {
     let conversation = "";
-    let history = 30;
+    let history = this.history;
     //if conversation history is relatively short we just take what has been written so far
-    if (this.conversation.lenght < 30) history = this.conversation.lenght;
-
-    for (let i = history; i >= 0; i--) {
+    if (this.conversation.length < history) history = this.conversation.length;
+    //console.log("length: "+ this.conversation.length)
+    for (let i = (history - 1); i >= 0; i--) {
       conversation += "\n" + this.conversation[i].text;
     }
     return conversation;
