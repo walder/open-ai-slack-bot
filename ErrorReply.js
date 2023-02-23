@@ -7,7 +7,7 @@ class ErrorReply {
   async postEmphemeralMessage() {
     let params = {
       token: process.env.SLACK_BOT_TOKEN,
-      text: ":skull: Sorry, Open AI, is down :skull:",
+      text: ":skull: Sorry, Open AI is down :skull:",
       channel: this.message.channel,
       user: this.message.user,
     };
