@@ -19,28 +19,39 @@ const app = new App({
 
 app.message("", async ({ message, say }) => {
   try {
-    if (message.thread_ts) {
-      console.log("threaded message");
-      return;
-    }
+    console.log(message.thread_ts);
 
     // console.log("user ID: "+message.user)
 
     var conversationHistory = [];
-    // Call the conversations.history method using WebClient
-    const result = await app.client.conversations.history({
-      token: process.env.SLACK_BOT_TOKEN,
-      channel: message.channel,
-    });
+    var history = 30;
 
-    conversationHistory = result.messages;
-    let conversation = new OpenAIConversationHandler(result.messages, 30);
+    //if message is in a thread
+    if (message.thread_ts) {
+      const result = await app.client.conversations.replies({
+        token: process.env.SLACK_BOT_TOKEN,
+        channel: message.channel,
+        ts: message.thread_ts,
+      });
+      conversationHistory = result.messages.reverse();
+      //if messate is new message in main chat window:
+    } else {
+      const result = await app.client.conversations.history({
+        token: process.env.SLACK_BOT_TOKEN,
+        channel: message.channel,
+      });
+      conversationHistory = result.messages;
+      history = 1
+    }
+
+    let conversation = new OpenAIConversationHandler(conversationHistory, history);
     let openAIPrompt = conversation.getConversation();
 
     const outputMessage = await app.client.chat.postMessage({
       token: process.env.SLACK_BOT_TOKEN,
       text: ":hourglass_flowing_sand:",
       channel: message.channel,
+      thread_ts: message.ts,
     });
 
     // Print results
